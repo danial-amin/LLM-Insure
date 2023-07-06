@@ -1,16 +1,17 @@
 import pandas as pd
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments,LlamaTokenizer, LlamaForCausalLM
 from sklearn.preprocessing import LabelEncoder
 from datasets import Dataset
 from transformers import pipeline
 
 class ClaimClassifier:
-    def __init__(self, file_path, model_name='LLAMA_MODEL'):
+    def __init__(self, file_path, model_name='openlm-research/open_llama_13b'):
         self.file_path = file_path
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.tokenizer = LlamaTokenizer.from_pretrained(model_name)
         self.le = LabelEncoder()
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
-
+        self.model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map='auto',)
+    
     def load_and_preprocess_data(self):
         claims = pd.read_csv(self.file_path)
         claims_texts = claims['text'].tolist()
